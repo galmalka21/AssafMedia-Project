@@ -1,0 +1,45 @@
+#dice {
+    width: 100px;
+    height: 100px;
+    perspective: 1000px;
+  }
+  
+  .face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+    text-align: center;
+    line-height: 96px;
+    font-size: 50px;
+    transform-style: preserve-3d;
+  }
+  
+  .face.one {
+    transform: rotateX(90deg) translateZ(50px);
+  }
+  
+  .face.two {
+    transform: rotateY(90deg) translateZ(50px);
+  }
+  
+  .face.three {
+    transform: rotateY(180deg) rotateX(90deg) translateZ(50px);
+  }
+  
+  .face.four {
+    transform: rotateY(-90deg) translateZ(50px);
+  }
+  
+  .face.five {
+    transform: rotateX(-90deg) translateZ(50px);
+  }
+  
+  .face.six {
+    transform: translateZ(50px);
+  }
+  
+  @keyframes rollDice {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+  }

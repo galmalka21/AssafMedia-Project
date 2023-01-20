@@ -1,0 +1,48 @@
+.character {
+    user-select: none;
+    pointer-events: none;
+    position: fixed;
+    z-index: 1;
+    border: 1px solid black;
+}
+
+.island {
+    user-select: none;
+    pointer-events: none;
+    display: inline;
+    position: fixed;
+    cursor: grab;
+    border: 1px solid black;
+}
+
+.island01 {
+
+}
+
+.island02 {
+
+}
+
+.island03 {
+
+}
+
+.island04 {
+
+}
+
+.island05 {
+
+}
+
+.island06 {
+
+
+}
+
+@media (max-width: 767px){
+    img {
+        height: 30%;
+        width: 30%;
+    }
+}

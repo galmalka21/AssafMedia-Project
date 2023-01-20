@@ -1,0 +1,57 @@
+body {
+    overflow: hidden;
+    margin: 0;
+}
+
+.game-screen {
+    position: fixed;
+    background-image: url('../assets/background.png');
+    background-size: cover;
+    display: none;
+}
+
+.sidemenu {
+    user-select: none;
+    pointer-events: none;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    right: 0px;
+    top: 0px;
+    background-image: url('../assets/sidemenu/sidemenu.png');
+    width: 15%;
+    height: 100%;
+    z-index: 2;
+    
+}
+
+.sidemenu :nth-child(1) {
+    pointer-events: all;
+    margin-left: auto;
+    margin-right: auto;
+    width: 128px;
+    height: 128px;
+    cursor: pointer;
+}
+
+.sidemenu :nth-child(2) {
+    pointer-events: all;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    height: 64px;
+    cursor: pointer;
+}
+
+.dice {
+    pointer-events: none;
+    font-size: 50px;
+    text-align: center;
+}
+
+@media (max-width: 767px){
+    .sidemenu {
+        width: 25%;
+    }
+}
