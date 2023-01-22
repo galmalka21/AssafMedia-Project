@@ -7,7 +7,6 @@
     <title>Priate Game</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/islands.css">
-    <link rel="stylesheet" href="../css/dice.css">
     <link rel="stylesheet" href="../css/popup.css">
 </head>
 <body onload="onLoad()">
@@ -16,8 +15,7 @@
         <section id="sidemenu" class="sidemenu">
             <img id="browse-btn" src="../assets/sidemenu/browsemap-btn.png" alt="" onclick="browseMap()">
             <img id="rolldice-btn" src="../assets/sidemenu/rolldice-btn.png" alt="" onclick="rollDice()">
-            <p id="dice">0</p>
-            
+            <img id="dice" class="dice" src="../assets/dice/dice01.png" alt="" />
         </section>
         <div>
             <img class="character" id="character" src="../assets/character.png" alt="">
@@ -36,7 +34,11 @@
         </section>
     </div>
     <div class="popup" id="popup-screen">
-
+        <div class="popup-container">
+            <p class="popup-header" id="popup-header"></p>
+            <p class="popup-text" id="popup-text"></p>
+            <button class="popup-button">New Game</button>
+        </div>
     </div>
     
 </body>

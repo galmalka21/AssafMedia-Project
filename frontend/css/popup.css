@@ -1,7 +1,49 @@
 .popup {
+    display: flex;
     position: fixed;
+    left: 25%;
+    top: 25%;
     background-color: antiquewhite;
     z-index: 3;
     width: 50%;
     height: 50%;
+    opacity: 0.8;
+}
+
+
+.popup-container {
+    display: flex;
+    margin: auto;
+    justify-content: space-evenly;
+    flex-direction: column;
+
+}
+
+.popup-header {
+    margin: 0;
+    margin-top: 5%;
+    user-select: none;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+}
+
+.popup-text {
+    user-select: none;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+}
+
+.popup-button {
+    user-select: none;
+    display: flex;
+    margin: auto;
+    font-size: 50px;
+    margin-bottom: 5%;
+    cursor: pointer;
 }

@@ -1,12 +1,12 @@
 body {
+    background-image: url('../assets/background.png');
+    background-size: cover;
     overflow: hidden;
     margin: 0;
 }
 
 .game-screen {
     position: fixed;
-    background-image: url('../assets/background.png');
-    background-size: cover;
     display: none;
 }
 
@@ -30,8 +30,8 @@ body {
     pointer-events: all;
     margin-left: auto;
     margin-right: auto;
-    width: 128px;
-    height: 128px;
+    width: 60%;
+    height: auto;
     cursor: pointer;
 }
 
@@ -39,19 +39,15 @@ body {
     pointer-events: all;
     margin-left: auto;
     margin-right: auto;
-    width: 80%;
-    height: 64px;
+    width: 60%;
+    height: auto;
     cursor: pointer;
 }
 
-.dice {
-    pointer-events: none;
-    font-size: 50px;
-    text-align: center;
-}
-
-@media (max-width: 767px){
-    .sidemenu {
-        width: 25%;
-    }
+.sidemenu :nth-child(3) {
+    pointer-events: all;
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    height: auto;
 }
