@@ -27,6 +27,9 @@ body {
 }
 
 .sidemenu :nth-child(1) {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
     pointer-events: all;
     margin-left: auto;
     margin-right: auto;
@@ -50,4 +53,19 @@ body {
     margin-right: auto;
     width: 60%;
     height: auto;
+    cursor: pointer;
+}
+
+.sidemenu :nth-child(4) {
+    pointer-events: all;
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    height: auto;
+    cursor: pointer;
+}
+
+.sidemenu .icons img {
+    width: 40%;
+    cursor: pointer;
 }

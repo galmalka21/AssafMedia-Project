@@ -1,55 +1,178 @@
 const express = require('express');
+const https = require("https");
+const fs = require("fs");
+const rateLimit = require("express-rate-limit");
+const bodyParser = require('body-parser');
+const ip = require('ip');
+const moment = require('moment');
 const mysql = require('mysql');
-const app = express();
+const path = require('path');
 
-// Connect to MySQL server
-const connection = mysql.createConnection({
+const app = express()
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: "Too many requests, please try again later"
+});
+
+const messages = ['message1' , 'message2' , 'message3' , 'message4' , 'message5']
+
+const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'password',
-  database: 'database'
+  database: 'mydb'
 });
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL server');
-});
-
-// Function to generate a random number between 1 and 6
-function generateNumber() {
-  return Math.floor(Math.random() * 6) + 1;
-}
-
-// Function to save three parameters to the database
-function saveToDb(param1, param2, param3) {
-  let sql = 'INSERT INTO tablename (col1, col2, col3) VALUES (?, ?, ?)';
-  let values = [param1, param2, param3];
-  connection.query(sql, values, (err, result) => {
-    if (err) throw err;
-    console.log('Data saved to database');
-  });
-}
-
-// Middleware function to check for valid serial key before allowing connection
-function checkKey(req, res, next) {
-  let serialKey = req.header('Serial-Key');
-  if (serialKey === 'valid_key') {
-    next();
-  } else {
-    res.status(401).send('Invalid serial key');
+db.connect((err) => {
+  if(err){
+    throw err
   }
+  console.log("MySql Connected")
+})
+
+app.post('*',limiter);
+app.use(bodyParser.json())
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/frontend/html/index.html');
+});
+
+app.get('/admin', (req , res) => {
+  res.sendFile(__dirname + '/frontend/html/admin.html')
+})
+
+app.get('/message', (req , res) => {
+  var randomIndex = Math.floor(Math.random() * messages.length)
+  var randomMessage = messages[randomIndex]
+  res.send(randomMessage)
+})
+
+app.post('/save', (req, res) => {
+  let description = req.body.description
+  let won = req.body.won
+  let ip_address = ip.address();
+  let timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+  //Sql injections
+  if(validateData(description,won)){
+    db.query(`INSERT INTO actions (ip_address, action, timestamp, winrate) VALUES (?, ?, ? , ?)`, [ip_address, description, timestamp, won],
+    (err, result) => {
+        if (err) {
+          console.log(err.message);
+          res.send({ status: 'failure' });
+        } else {
+          console.log("record inserted");
+          res.send({ status: 'success' });
+        }
+      });
+  } else {
+    res.send({status: 'failure, unknown data'})
+  }
+  
+});
+
+app.get('/load', (req,res) => {
+  db.query('SELECT * FROM actions' , (err , result) => {
+    if(err){
+      console.log(err);
+    } 
+    else {
+      
+      res.send(result)
+    }
+  })
+})
+
+app.get('/load-user-data',(req,res) => {
+  db.query('SELECT * FROM users_actions' , (err , result) => {
+    if(err){
+      console.log(err);
+    } 
+    else {
+      res.send(result)
+    }
+  })
+})
+
+app.post('/save-user', (req,res) => {
+  let username = req.body.username
+  db.query(`INSERT INTO users (username) VALUES (?)`, [username]),
+  (err, result) => {
+    if(err) {
+      console.log(err.message);
+      res.send({status: 'failure'})
+    } else {
+      console.log('record inserted');
+      res.send({status: 'success'})
+    }
+  }
+})
+
+app.post('/save-user-data', (req,res) => {
+  let username = req.body.username
+  let won = req.body.won
+  username.toLowerCase()
+  db.query('INSERT INTO users_actions (username , won) VALUES (? , ?) ',[username , won]),
+  (err , result) => {
+    if(err){
+      console.log(err.message)
+      res.send({status: 'failure'})
+    } else {
+      console.log('record inserted');
+      res.send({status: 'success'})
+    }
+  }
+})
+
+app.get('/load-users', (req,res) => {
+  db.query('SELECT * FROM users', (err , result) => {
+    if(err){
+      console.log(err);
+    } else{
+      res.send(result)
+    }
+  })
+})
+
+app.post('/admin-login', (req, res ) => {
+  console.log('admin attempt');
+})
+
+//XSS
+function validateData(description, won){
+  let descValidate = false
+  let wonValidate = false
+  let accpetedDescription = ["player rolled 1 and stayed on the island" , "player rolled 2 and drunk bad rum" , "player rolled 2 and drunk good rum" , "player rolled 3 and lost to a dragon"
+                            ,"player rolled 4 and found the treasure" , "player rolled 5 and found a message in a bottle" , "player rolled 6 and arrived to an island"]
+  for(let i = 0 ; i < accpetedDescription.length ; ++i){
+    if(accpetedDescription[i] == description){
+      descValidate = true
+      break
+    } 
+  }
+
+  if(won == 1 || won == 0){
+    wonValidate = true
+  }
+
+  if(descValidate && wonValidate){
+    console.log("Valid Data")
+    return true
+  }
+  return false
 }
 
-// Use middleware function on all routes
-app.use(checkKey);
 
-// Example route to generate a number and save it to the database
-app.get('/generate', (req, res) => {
-  let randomNum = generateNumber();
-  saveToDb(randomNum, 'example_param2', 'example_param3');
-  res.send(`Generated number: ${randomNum}`);
-});
+https
+  .createServer(
+    {
+      key: fs.readFileSync("key.pem"),
+      cert: fs.readFileSync("cert.pem"),
+    },
+    app
+  )
+  .listen(3000, () => {
+    console.log("serever is runing at port 3000");
+  });
 
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
-});

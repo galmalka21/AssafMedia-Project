@@ -1,5 +1,5 @@
 .popup {
-    display: flex;
+    display: none;
     position: fixed;
     left: 25%;
     top: 25%;
@@ -11,12 +11,43 @@
 }
 
 
-.popup-container {
-    display: flex;
+.popup-endgame {
+    display: none;
     margin: auto;
     justify-content: space-evenly;
     flex-direction: column;
 
+}
+
+.popup-onload {
+    display: none;
+    margin: auto;
+    justify-content: space-evenly;
+    flex-direction: column;
+
+}
+
+.popup-alert {
+    display: none;
+    margin: auto;
+    justify-content: space-evenly;
+    flex-direction: column;
+
+}
+
+.popup-stats {
+    display: none;
+    margin: auto;
+    justify-content: space-evenly;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.popup-descritpion {
+    display: none;
+    margin: auto;
+    justify-content: space-evenly;
+    flex-direction: column;
 }
 
 .popup-header {
@@ -28,6 +59,18 @@
     align-items: center;
     justify-content: center;
     font-size: 60px;
+}
+
+
+.popup-input {
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .popup-text {
@@ -46,4 +89,35 @@
     font-size: 50px;
     margin-bottom: 5%;
     cursor: pointer;
+}
+
+.card-container {
+    margin: auto;
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    
+}
+
+.card {
+    position: relative;
+    width: 160px;
+    height: 140px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    margin-left: 25px;
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.card span {
+    margin-top: 20px;
+    display: block;
+    color: rgb(116, 112, 112);
+    font-size: 30px;
+    font-weight: 400;
 }

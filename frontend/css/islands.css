@@ -3,15 +3,17 @@
     pointer-events: none;
     position: fixed;
     z-index: 1;
+    border: 1px solid black;
     
 }
 
 .island {
     user-select: none;
-    pointer-events: none;
+
     display: inline;
     position: fixed;
-    cursor: grab;
+    cursor: pointer;
+    border: 1px solid black;
 }
 
 .island01 {
