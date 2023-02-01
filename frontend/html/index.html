@@ -7,36 +7,75 @@
     <title>Priate Game</title>
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/islands.css">
-    <link rel="stylesheet" href="../css/dice.css">
     <link rel="stylesheet" href="../css/popup.css">
 </head>
 <body onload="onLoad()">
 
     <div class="game-screen" id="game-screen">
         <section id="sidemenu" class="sidemenu">
-            <img id="browse-btn" src="../assets/sidemenu/browsemap-btn.png" alt="" onclick="browseMap()">
+            <!-- <div class="icons" id="icons">
+                <img src="../assets/sidemenu/plus.png" alt="" onclick="expandMap(1)">
+                <img src="../assets/sidemenu/minus.png" alt="" onclick="expandMap(0)">
+            </div> -->
+            <img id="browse-btn" src="../assets/sidemenu/browsemap-btn.png" alt="" onclick="toggleBrowseMap()">
             <img id="rolldice-btn" src="../assets/sidemenu/rolldice-btn.png" alt="" onclick="rollDice()">
-            <p id="dice">0</p>
-            
+            <img id="dice" class="dice" src="../assets/dice/dice01.png" alt="" />
+            <img id="viewstats-btn" src="../assets/sidemenu/viewstats_btn.png" onclick="viewUserStats()" alt="">
         </section>
         <div>
             <img class="character" id="character" src="../assets/character.png" alt="">
         </div>
         <section id="islands" class="islands">
             <div>
-                <img id="island01" class="island01 island" src="../assets/islands/island-01.png" alt="">
-                <img id="island02" class="island02 island" src="../assets/islands/island-02.png" alt="">
-                <img id="island03" class="island03 island" src="../assets/islands/island-03.png" alt="">
+                <img id="island01" class="island01 island" src="../assets/islands/island-01.png" onclick="showIslandDescription(1)" alt="">
+                <img id="island02" class="island02 island" src="../assets/islands/island-02.png" onclick="showIslandDescription(2)" alt="">
+                <img id="island03" class="island03 island" src="../assets/islands/island-03.png" onclick="showIslandDescription(3)" alt="">
             </div>
             <div>
-                <img id="island04" class="island04 island" src="../assets/islands/island-04.png" alt="">
-                <img id="island05" class="island05 island" src="../assets/islands/island-05.png" alt="">
-                <img id="island06" class="island06 island" src="../assets/islands/island-06.png" alt="">
+                <img id="island04" class="island04 island" src="../assets/islands/island-04.png" onclick="showIslandDescription(4)" alt="">
+                <img id="island05" class="island05 island" src="../assets/islands/island-05.png" onclick="showIslandDescription(5)" alt="">
+                <img id="island06" class="island06 island" src="../assets/islands/island-06.png" onclick="showIslandDescription(6)" alt="">
             </div>
         </section>
     </div>
     <div class="popup" id="popup-screen">
-
+        <div class="popup-endgame" id="popup-endgame">
+            <p class="popup-header" id="popup-header"></p>
+            <p class="popup-text" id="popup-text"></p>
+            <button class="popup-button" id="popup-button" onclick="restartGame()">New Game</button>
+        </div>
+        <div class="popup-onload" id="popup-onload">
+            <p class="popup-header" id="popup-header">Welcome To Pirate Game!</p>
+            <input type="text" id="popup-input" class="popup-input" placeholder="Enter username">
+            <button class="popup-button" id="popup-button" onclick="handleLogin(1)">Login</button>
+            <button class="popup-button" id="popup-button" onclick="handleLogin(0)">Continue as a guest</button>
+        </div>
+        <div class="popup-alert" id="popup-alert">
+            <p class="popup-text-alert">Game doesnt support horizontal mode</p>
+        </div>
+        <div class="popup-stats" id="popup-stats">
+            <p class="popup-header" id="popup-header">User Stats</p>
+            <div class="card-container">
+                <div class="card">
+                    <h4>Total Wins</h2>
+                    <span id="user-wins"></span>
+                </div>
+                <div class="card">
+                    <h4>Total Games</h2>
+                    <span id="user-games"></span>
+                </div>
+                <div class="card" >
+                    <h4>Total Losses</h2>
+                    <span id="user-losses"></span>
+                </div>
+            </div>
+            <button onclick="onPopupVisibilityChange()" class="popup-button">Close</button>
+        </div>
+        <div class="popup-description" id="popup-description">
+            <h4 class="popup-header" id="popup-header"></h4>
+            <p class="island-text" id="island-text"></p>
+            <button onclick="onPopupVisibilityChange()" class="popup-button">Close</button>
+        </div>
     </div>
     
 </body>
