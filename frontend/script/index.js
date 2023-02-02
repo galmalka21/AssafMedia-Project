@@ -1,15 +1,22 @@
 const gameScreen = document.getElementById('game-screen')
+
 const popupScreen = document.getElementById('popup-screen')
 const popupHeader = document.getElementById('popup-header')
 const popupText = document.getElementById('popup-text')
-const popupButton = document.getElementById('popup-button')
 const popupInput = document.getElementById('popup-input')
+const popupLogin = document.getElementById('popup-login')
+const popupGuest = document.getElementById('popup-guest')
+const popupRestart = document.getElementById('popup-restart')
+const popupCards = document.getElementById('popup-cards')
+const popupClose = document.getElementById('popup-close')
 
-const popupEndGame = document.getElementById('popup-endgame')
-const popupOnLoad = document.getElementById('popup-onload')
-const popupAlert = document.getElementById('popup-alert')
-const popupStats = document.getElementById('popup-stats')
-const popupDesc = document.getElementById('popup-description')
+const cardGames = document.getElementById('card-user-games')
+const cardWins = document.getElementById('card-user-wins')
+const cardLosses = document.getElementById('card-user-losses')
+
+const cardGamesText = document.getElementById('user-games')
+const cardWinsText = document.getElementById('user-wins')
+const cardLossesText = document.getElementById('user-losses')
 
 const sidemenuScreen = document.getElementById('sidemenu')
 const browseMapButton = document.getElementById('browse-btn')
@@ -29,6 +36,7 @@ const diceRollImgs = {}
 let guest = false
 let username
 
+let mapAtStartPosition = true
 let popupVisable = true
 let pirateMoving = false
 let alreadyRolled = false
@@ -143,10 +151,12 @@ function appInit(){
 function restartGame(){
     onPopupVisibilityChange()
     currentIsland = 1
+    
     distanceX = 0
     distanceY = 0
     startX = 0
     startY = 0
+    mapAtStartPosition = true
     enableBrowseMap = false
     pirateMoving = false
     alreadyRolled = false
@@ -189,7 +199,7 @@ function moveMap(){
     if(!pirateMoving){
         movePirate(currentIsland)
     }
-    
+    mapAtStartPosition = false
 }
 
 function moveAnimationHandler(island){
@@ -303,7 +313,10 @@ async function endGameResults(){
         won: ''
     }
     detectPopupType('endgame')
-    onPopupVisibilityChange()
+    if(!popupVisable){
+        onPopupVisibilityChange()
+    }
+    
     
     switch(finalNumber){
         case 1:
@@ -366,33 +379,60 @@ async function endGameResults(){
 }
 
 function handleResize(){
-    screenWidth = window.innerWidth
-    screenHeight = window.innerHeight
-
-    distanceX = (screenWidth / prevWidth) * distanceX
-    distanceY = (screenHeight / prevHeight) * distanceY
-
-    gameScreen.style.width = (screenWidth * screenMultiplyer) + 'px'
-    gameScreen.style.height = (screenHeight * screenMultiplyer) + 'px'
-
-    character.style.width = (screenWidth * screenMultiplyer) * 0.05 + 'px'
-
-    Object.keys(islands).forEach(key => {
-        initialPostion[key].X = distanceX + (screenWidth * screenMultiplyer) * precentPosition[key].X
-        initialPostion[key].Y = distanceY + (screenHeight * screenMultiplyer) * precentPosition[key].Y
-
-        islands[key].style.left = initialPostion[key].X + 'px'
-        islands[key].style.top = initialPostion[key].Y + 'px'
-    })
-
-    prevWidth = screenWidth
-    prevHeight = screenHeight
+    if(mapAtStartPosition){
+        screenWidth = window.innerWidth
+        screenHeight = window.innerHeight
     
+        distanceX = (screenWidth / prevWidth) * distanceX
+        distanceY = (screenHeight / prevHeight) * distanceY
+    
+        gameScreen.style.width = (screenWidth * screenMultiplyer) + 'px'
+        gameScreen.style.height = (screenHeight * screenMultiplyer) + 'px'
+    
+        character.style.width = (screenWidth * screenMultiplyer) * 0.05 + 'px'
+    
+        Object.keys(islands).forEach(key => {
+            initialPostion[key].X = distanceX + (screenWidth * screenMultiplyer) * precentPosition[key].X
+            initialPostion[key].Y = distanceY + (screenHeight * screenMultiplyer) * precentPosition[key].Y
+    
+            islands[key].style.left = initialPostion[key].X + 'px'
+            islands[key].style.top = initialPostion[key].Y + 'px'
+        })
+    
+        prevWidth = screenWidth
+        prevHeight = screenHeight
+        
+        handleTextResize()
+    } else {
+        returnToStartPoint()
+    }
+    
+    
+}
+
+function handleTextResize(){
     popupHeader.style.fontSize = screenWidth / 40 + 'px'
     popupText.style.fontSize = screenWidth / 50 + 'px'
-    popupButton.style.fontSize = screenWidth / 50 + 'px'
     popupInput.style.fontSize = screenWidth / 50 + 'px'
-    
+
+    popupInput.style.fontSize = screenWidth / 50 + 'px'
+    popupGuest.style.fontSize = screenWidth / 50 + 'px'
+    popupLogin.style.fontSize = screenWidth / 50 + 'px'
+    popupRestart.style.fontSize = screenWidth / 50 + 'px'
+    popupClose.style.fontSize = screenWidth / 50 + 'px'
+
+    cardGames.style.width = screenWidth / 15 + 'px'
+    cardWins.style.width = screenWidth / 15 + 'px'
+    cardLosses.style.width = screenWidth / 15 + 'px'
+
+    cardGames.style.height = screenWidth / 15 + 'px'
+    cardWins.style.height = screenWidth / 15 + 'px'
+    cardLosses.style.height = screenWidth / 15 + 'px'
+
+    cardGamesText.style.fontSize = screenWidth / 50 + 'px'
+    cardWinsText.style.fontSize = screenWidth / 50 + 'px'
+    cardLossesText.style.fontSize = screenWidth / 50 + 'px'
+
 }
 
 function toggleBrowseMap(){
@@ -422,39 +462,56 @@ function expandMap(type){
 
 function detectPopupType(type){
     if(type == 'endgame'){
-        popupEndGame.style.display = 'flex'
-        popupAlert.style.display = 'none'
-        popupOnLoad.style.display = 'none'
-        popupStats.style.display = 'none'
-        popupDesc.style.display = 'none'
+        popupHeader.style.display = 'block'
+        popupText.style.display = 'block'
+        popupRestart.style.display = 'block'
+        popupInput.style.display = 'none'
+        popupLogin.style.display = 'none'
+        popupGuest.style.display = 'none'
+        popupCards.style.display = 'none'
+        popupClose.style.display = 'none'
     }
     if(type == 'onload'){
-        popupEndGame.style.display = 'none'
-        popupAlert.style.display = 'none'
-        popupOnLoad.style.display = 'flex'
-        popupStats.style.display = 'none'
-        popupDesc.style.display = 'none'
+        popupHeader.style.display = 'block'
+        popupHeader.innerHTML = "Welcome To Pirate Game!"
+        popupText.style.display = 'none'
+        popupRestart.style.display = 'none'
+        popupInput.style.display = 'block'
+        popupLogin.style.display = 'block'
+        popupGuest.style.display = 'block'
+        popupCards.style.display = 'none'
+        popupClose.style.display = 'none'
     }
     if(type == 'alert'){
-        popupEndGame.style.display = 'none'
-        popupAlert.style.display = 'flex'
-        popupOnLoad.style.display = 'none'
-        popupStats.style.display = 'none'
-        popupDesc.style.display = 'none'
+        popupHeader.style.display = 'none'
+        popupText.style.display = 'block'
+        popupText.innerHTML = "Game doesnt support horizontal mode"
+        popupRestart.style.display = 'none'
+        popupInput.style.display = 'none'
+        popupLogin.style.display = 'none'
+        popupGuest.style.display = 'none'
+        popupCards.style.display = 'none'
+        popupClose.style.display = 'none'
     }
     if(type == 'stats'){
-        popupEndGame.style.display = 'none'
-        popupAlert.style.display = 'none'
-        popupOnLoad.style.display = 'none'
-        popupStats.style.display = 'flex'
-        popupDesc.style.display = 'none'
+        popupHeader.style.display = 'block'
+        popupText.style.display = 'none'
+        popupRestart.style.display = 'none'
+        popupInput.style.display = 'none'
+        popupLogin.style.display = 'none'
+        popupGuest.style.display = 'none'
+        popupCards.style.display = 'flex'
+        popupClose.style.display = 'block'
     }
     if(type == 'description'){
-        popupEndGame.style.display = 'none'
-        popupAlert.style.display = 'none'
-        popupOnLoad.style.display = 'none'
-        popupStats.style.display = 'none'
-        popupDesc.style.display = 'flex'
+        popupHeader.style.display = 'block'
+        popupText.style.display = 'block'
+        popupRestart.style.display = 'none'
+        popupInput.style.display = 'none'
+        popupLogin.style.display = 'none'
+        popupGuest.style.display = 'none'
+        popupCards.style.display = 'none'
+        popupClose.style.display = 'block'
         
     }
 }
@@ -488,6 +545,7 @@ function returnToStartPoint(){
                 movePirate(currentIsland)
             }
         },1)
+        mapAtStartPosition = true
     })
     
 }
@@ -543,14 +601,14 @@ async function handleLogin(type){
     if(type == 1){
         guest = false
         let value = popupInput.value
-        if(value.length >= 3){
+        if(value.length >= 3 && value.length <= 30){
             username = value
             await saveUsername(value)
             onPopupVisibilityChange()
             console.log(username);
         } else {
             popupInput.value = null
-            popupInput.placeholder = 'Username should be more than 3 letters!'
+            popupInput.placeholder = 'Username should be more than 3 letters or less than 30!'
             
         }
     } else {
@@ -593,9 +651,6 @@ async function saveUsername(uname){
 }
 
 async function viewUserStats(){
-    let cardGames = document.getElementById('user-games')
-    let cardWins = document.getElementById('user-wins')
-    let cardLosses = document.getElementById('user-losses')
     if(username){
         onPopupVisibilityChange()
         detectPopupType('stats')
@@ -613,9 +668,10 @@ async function viewUserStats(){
             userData[i].won == 1 ? userWins++ : userLosses++
         }
         let fixedUsername = username.charAt(0).toUpperCase() + username.slice(1)
-        cardGames.innerHTML = totalGames
-        cardWins.innerHTML = userWins
-        cardLosses.innerHTML = userLosses
+        popupHeader.innerHTML = fixedUsername + " Stats!"
+        cardGamesText.innerHTML = totalGames
+        cardWinsText.innerHTML = userWins
+        cardLossesText.innerHTML = userLosses
     }
     
 }
@@ -630,14 +686,24 @@ function showIslandDescription(island){
                 popupText.innerHTML = "If you stay on this island you will starve and lose.."
                 break
             case 2:
+                popupHeader.innerHTML = "Second Island"
+                popupText.innerHTML = "Beware of the rum, rumors says its cursed.."
                 break
             case 3:
+                popupHeader.innerHTML = "Third Island"
+                popupText.innerHTML = "Some says a mighty dragons lives here.."
                 break
             case 4:
+                popupHeader.innerHTML = "Forth Island"
+                popupText.innerHTML = "Go two steps right and dig, I heard a pirate buried his treasure there"
                 break
             case 5:
+                popupHeader.innerHTML = "Fifth Island"
+                popupText.innerHTML = "A closed bottle with a note inside, I wonder whats written there"
                 break
             case 6:
+                popupHeader.innerHTML = "Sixth Island"
+                popupText.innerHTML = "Escape Island you will live if u get here!"
                 break
             default:
                 break
@@ -662,6 +728,7 @@ window.addEventListener("mousedown", function(event) {
     startX = event.clientX;
     startY = event.clientY;
   });
+
   
 window.addEventListener("mousemove", function(event) {
     if (event.which === 1) {
@@ -675,6 +742,25 @@ window.addEventListener("mousemove", function(event) {
       
     }
   });
+
+  window.addEventListener("ontouchstart", function(event) {
+    startX = event.clientX;
+    startY = event.clientY;
+  });
+
+  window.addEventListener("ontouchmove", function(event) {
+    if (event.which === 1) {
+      let currentX = event.clientX;
+      let currentY = event.clientY;
+      distanceX = currentX - startX
+      distanceY = currentY - startY
+      if(enableBrowseMap && !pirateMoving){
+        moveMap()
+      }
+      console.log("MOVE");
+      
+    }
+  });
   
 function detectScreen(){
     if(screenOrientation.matches){
@@ -684,7 +770,7 @@ function detectScreen(){
     } else {
         popupScreen.style.display = 'none'
         gameScreen.style.display = 'block'
-        if(!guest || !username){
+        if(!guest && !username){
             detectPopupType('onload')
             onPopupVisibilityChange()
         }
