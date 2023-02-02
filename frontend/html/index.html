@@ -39,42 +39,28 @@
         </section>
     </div>
     <div class="popup" id="popup-screen">
-        <div class="popup-endgame" id="popup-endgame">
+        <div class="popup-container">
             <p class="popup-header" id="popup-header"></p>
             <p class="popup-text" id="popup-text"></p>
-            <button class="popup-button" id="popup-button" onclick="restartGame()">New Game</button>
-        </div>
-        <div class="popup-onload" id="popup-onload">
-            <p class="popup-header" id="popup-header">Welcome To Pirate Game!</p>
             <input type="text" id="popup-input" class="popup-input" placeholder="Enter username">
-            <button class="popup-button" id="popup-button" onclick="handleLogin(1)">Login</button>
-            <button class="popup-button" id="popup-button" onclick="handleLogin(0)">Continue as a guest</button>
-        </div>
-        <div class="popup-alert" id="popup-alert">
-            <p class="popup-text-alert">Game doesnt support horizontal mode</p>
-        </div>
-        <div class="popup-stats" id="popup-stats">
-            <p class="popup-header" id="popup-header">User Stats</p>
-            <div class="card-container">
-                <div class="card">
+            <button class="popup-button" id="popup-login" onclick="handleLogin(1)">Login</button>
+            <button class="popup-button" id="popup-guest" onclick="handleLogin(0)">Continue as a guest</button>
+            <button class="popup-button" id="popup-restart" onclick="restartGame()">New Game</button>
+            <div class="card-container" id="popup-cards">
+                <div class="card" id="card-user-wins">
                     <h4>Total Wins</h2>
                     <span id="user-wins"></span>
                 </div>
-                <div class="card">
+                <div class="card" id="card-user-games">
                     <h4>Total Games</h2>
                     <span id="user-games"></span>
                 </div>
-                <div class="card" >
+                <div class="card" id="card-user-losses">
                     <h4>Total Losses</h2>
                     <span id="user-losses"></span>
                 </div>
             </div>
-            <button onclick="onPopupVisibilityChange()" class="popup-button">Close</button>
-        </div>
-        <div class="popup-description" id="popup-description">
-            <h4 class="popup-header" id="popup-header"></h4>
-            <p class="island-text" id="island-text"></p>
-            <button onclick="onPopupVisibilityChange()" class="popup-button">Close</button>
+            <button onclick="onPopupVisibilityChange()" class="popup-button" id="popup-close">Close</button>
         </div>
     </div>
     
