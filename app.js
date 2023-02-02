@@ -1,12 +1,13 @@
 const express = require('express');
 const https = require("https");
 const fs = require("fs");
-const rateLimit = require("express-rate-limit");
-const bodyParser = require('body-parser');
-const ip = require('ip');
 const moment = require('moment');
 const mysql = require('mysql');
 const path = require('path');
+const bcrypt = require('bcrypt');
+const rateLimit = require("express-rate-limit");
+const bodyParser = require('body-parser');
+const ip = require('ip');
 
 const app = express()
 
@@ -16,7 +17,7 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later"
 });
 
-const messages = ['message1' , 'message2' , 'message3' , 'message4' , 'message5']
+const messages = ['הודעה' , 'הודעה1' , 'הודעה3' , 'הודעה4' , 'הודעה5']
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -32,6 +33,7 @@ db.connect((err) => {
 })
 
 app.post('*',limiter);
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'frontend')));
 
@@ -136,8 +138,29 @@ app.get('/load-users', (req,res) => {
 })
 
 app.post('/admin-login', (req, res ) => {
-  console.log('admin attempt');
+  console.log("admin login");
+  let username = req.body.username
+  let password = req.body.password
+  let hashFromDatabase
+  console.log("Username: " + username + " , " + "Passowrd: " + password);
+  db.query('SELECT username, password FROM users WHERE username = ?', [username], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      bcrypt.compare(password, result[0].password, function(err, results) {
+        if (results) {
+          res.send({success: true, message: 'Login successful' });
+        } else {
+          res.send({success: false, message: 'Unauthorized: Invalid credentials' });
+        }
+    });
+    }
+    
+  });
+  console.log(hashFromDatabase);
+  
 })
+
 
 //XSS
 function validateData(description, won){
