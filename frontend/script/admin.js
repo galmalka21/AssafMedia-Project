@@ -1,15 +1,36 @@
-let db
+const loginScreen = document.getElementById('login')
+const mainScreen = document.getElementById('main')
 
-async function onLoad(){
+const winLoseRatioSpan = document.getElementById('win-lose-ratio');
+const totalGamesSpan = document.getElementById('total-games');
+const numberOfUsersSpan = document.getElementById('number-of-users');
+const leastRolledDiceSpan = document.getElementById('least-rolled-dice');
+const mostRolledDiceSpan = document.getElementById('most-rolled-dice');
+
+let db , totalUsers
+
+async function appInit(){
+    loginScreen.style.display = 'none'
+    mainScreen.style.display = 'block'
     db = await getData()
-    console.log(calculateWinRate());
-    console.log(calculateMostRolledDice())
+    await getUsers()
+    winLoseRatioSpan.innerHTML = calculateWinRate()
+    mostRolledDiceSpan.innerHTML = calculateMostRolledDice().maxKey
+    leastRolledDiceSpan.innerHTML = calculateMostRolledDice().minKey
+    totalGamesSpan.innerHTML = db.length
+    numberOfUsersSpan.innerHTML = totalUsers
 }
 
 async function getData(){
-    const response = await fetch('https://localhost:3000/load');
+    const response = await fetch('http://localhost:3000/load');
     const data = await response.json();
     return data;
+}
+
+async function getUsers(){
+    const response = await fetch('http://localhost:3000/load-users');
+    const data = await response.json();
+    totalUsers = await data.length
 }
 
 function calculateWinRate(){
@@ -30,22 +51,47 @@ function calculateMostRolledDice(){
         let number = parseInt(words[2])
         obj[number]++
     }
-    let maxKey;
-    let maxValue = -Infinity;
-    for (let key in obj) {
-        if (obj[key] > maxValue) {
-            maxValue = obj[key];
-            maxKey = key;
-        }
-    }
-    return {maxKey , maxValue}
-    
+
+    let entries = Object.entries(obj);
+    entries.sort((a, b) => a[1] - b[1]);
+    return { minKey: entries[0][0], minValue: entries[0][1], maxKey: entries[entries.length - 1][0], maxValue: entries[entries.length - 1][1] };
 }
 
-function calculateNumberOfPlayers(){
-    let count = 0
-    let playerList = []
-    for(let i = 0 ; i < db.length ; ++i){
-        
-    }
-}
+
+document.querySelector("form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    
+    await fetch('http://localhost:3000/admin-login', {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value
+      }),
+    })
+    .then(response => response.json())
+    .then((data) =>{
+      if(data.success){
+        appInit()
+      } else {
+
+      }
+    })
+  });
+    
+
+  function handleLogout(){
+    loginScreen.style.display = 'flex'
+    mainScreen.style.display = 'none'
+    db = null
+    totalUsers = null
+  }
+
+setTimeout(() =>handleLogout(), 1000 * 60 * 1)
