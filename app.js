@@ -1,13 +1,15 @@
+require('dotenv').config({ path: './secrets.env' });
 const express = require('express');
-const https = require("https");
-const fs = require("fs");
 const moment = require('moment');
 const mysql = require('mysql');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const rateLimit = require("express-rate-limit");
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser')
 const ip = require('ip');
+const jwt = require('jsonwebtoken')
+const {createTokens , validateToken} = require('./jwt')
 
 const app = express()
 
@@ -17,12 +19,19 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later"
 });
 
+app.use(cookieParser())
+app.post('*',limiter);
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json())
+app.use(express.static(path.join(__dirname, 'frontend')));
+
 const messages = ['הודעה' , 'הודעה1' , 'הודעה3' , 'הודעה4' , 'הודעה5']
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  database: 'mydb'
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  database: process.env.DATABASE,
+  password: process.env.DATABASE_PASSWORD
 });
 
 db.connect((err) => {
@@ -32,10 +41,7 @@ db.connect((err) => {
   console.log("MySql Connected")
 })
 
-app.post('*',limiter);
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json())
-app.use(express.static(path.join(__dirname, 'frontend')));
+
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/frontend/html/index.html');
@@ -74,7 +80,7 @@ app.post('/save', (req, res) => {
   
 });
 
-app.get('/load', (req,res) => {
+app.get('/load', validateToken , (req,res) => {
   db.query('SELECT * FROM actions' , (err , result) => {
     if(err){
       console.log(err);
@@ -138,17 +144,17 @@ app.get('/load-users', (req,res) => {
 })
 
 app.post('/admin-login', (req, res ) => {
-  console.log("admin login");
-  let username = req.body.username
-  let password = req.body.password
-  let hashFromDatabase
-  console.log("Username: " + username + " , " + "Passowrd: " + password);
+  const {username , password} = req.body
   db.query('SELECT username, password FROM users WHERE username = ?', [username], (err, result) => {
     if (err) {
       console.log(err);
     } else {
       bcrypt.compare(password, result[0].password, function(err, results) {
         if (results) {
+          const accessToken = createTokens(username)
+          res.cookie("access-token", accessToken , {
+            maxAge: 1000 * 60 * 1
+          })
           res.send({success: true, message: 'Login successful' });
         } else {
           res.send({success: false, message: 'Unauthorized: Invalid credentials' });
@@ -157,7 +163,6 @@ app.post('/admin-login', (req, res ) => {
     }
     
   });
-  console.log(hashFromDatabase);
   
 })
 
@@ -187,15 +192,7 @@ function validateData(description, won){
 }
 
 
-https
-  .createServer(
-    {
-      key: fs.readFileSync("key.pem"),
-      cert: fs.readFileSync("cert.pem"),
-    },
-    app
-  )
-  .listen(3000, () => {
+app.listen(3000, () => {
     console.log("serever is runing at port 3000");
   });
 

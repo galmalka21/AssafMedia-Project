@@ -26,6 +26,16 @@ body {
     
 }
 
+.close-sidemenu {
+    user-select: none;
+    position: fixed;
+    width: 2%;
+    top: 0px;
+    right: 0px;
+    z-index: 3;
+    cursor: pointer;
+}
+
 .sidemenu :nth-child(1) {
     display: flex;
     flex-direction: row;

@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="../css/admin.css">
     <title>Admin</title>
 </head>
-<body onload="onLoad()">
+<body>
     <header>
         <h1>Overall Statistics</h1>
     </header>
     <section class="login" id="login">
-        <form action="/admin-login" method="post">
+        <form>
             <h2>Admin Login</h2>
             <input type="text" id="username" name="username" placeholder="Username" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
@@ -23,23 +23,23 @@
         <div class="card-container">
             <section class="card">
                 <h2>Win/Loss Ratio</h2>
-                <span>0.5</span>
+                <span id="win-lose-ratio"></span>
             </section>
             <section class="card">
                 <h2>Total Games</h2>
-                <span>24</span>
+                <span id="total-games"></span>
             </section>
             <section class="card">
                 <h2>Number Of Players</h2>
-                <span>5</span>
+                <span id="number-of-users"></span>
             </section>
             <section class="card">
                 <h2>Least Rolled Dice</h2>
-                <span>2</span>
+                <span id="least-rolled-dice"></span>
             </section>
             <section class="card">
                 <h2>Most Rolled Dice</h2>
-                <span>5</span>
+                <span id="most-rolled-dice"></span>
             </section>
         </div>
     </section>

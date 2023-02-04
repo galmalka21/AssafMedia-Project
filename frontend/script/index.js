@@ -38,6 +38,7 @@ let username
 
 let mapAtStartPosition = true
 let popupVisable = true
+let sidemenuVisible = true
 let pirateMoving = false
 let alreadyRolled = false
 let enableBrowseMap = false
@@ -62,6 +63,7 @@ let islandAjustments = {}
 let startX, startY;
 let distanceX = 0;
 let distanceY = 0;
+
 
 function onLoad(){
     appInit()
@@ -151,7 +153,9 @@ function appInit(){
 function restartGame(){
     onPopupVisibilityChange()
     currentIsland = 1
-    
+    gameScreen.style.left = 0 + 'px'
+    gameScreen.style.top = 0 + 'px'
+
     distanceX = 0
     distanceY = 0
     startX = 0
@@ -167,7 +171,6 @@ function restartGame(){
     movePirate(currentIsland)
 }
 
-
 function movePirate(key){
     let islandRect = islands[key].getBoundingClientRect(); 
     let characterRect = character.getBoundingClientRect();
@@ -181,19 +184,17 @@ function movePirate(key){
 }
 
 function moveMap(){  
-    let newWidth =  Math.min(Math.max(gameScreen.offsetLeft + distanceX, -screenWidth ), 0)
-    let newHeight = Math.min(Math.max(gameScreen.offsetTop + distanceY, -screenHeight ), 0)
-    gameScreen.style.left = newWidth + 'px'
-    gameScreen.style.top = newHeight + 'px'
-    
-    distanceX = (screenWidth / prevWidth) * distanceX
-    distanceY = (screenHeight / prevHeight) * distanceY
+    let newGameScreenLeft =  Math.min(Math.max(gameScreen.offsetLeft + distanceX, -screenWidth ), 0)
+    let newGameScreenTop = Math.min(Math.max(gameScreen.offsetTop + distanceY, -screenHeight ), 0)
+
+    gameScreen.style.left = newGameScreenLeft + 'px'
+    gameScreen.style.top = newGameScreenTop + 'px'
 
     Object.keys(islands).forEach(key =>{
-        let width = Math.min(Math.max(islands[key].offsetLeft + distanceX, -screenWidth  + initialPostion[key].X), initialPostion[key].X)
-        let height = Math.min(Math.max(islands[key].offsetTop + distanceY, -screenHeight + initialPostion[key].Y), initialPostion[key].Y)
-        islands[key].style.left = width + 'px'
-        islands[key].style.top = height + 'px'
+        let islandLeft = Math.min(Math.max(islands[key].offsetLeft + distanceX, -screenWidth  + initialPostion[key].X), initialPostion[key].X)
+        let islandTop = Math.min(Math.max(islands[key].offsetTop + distanceY, -screenHeight + initialPostion[key].Y), initialPostion[key].Y)
+        islands[key].style.left = islandLeft + 'px'
+        islands[key].style.top = islandTop + 'px'
     })
     
     if(!pirateMoving){
@@ -217,7 +218,6 @@ function moveAnimationHandler(island){
     
 }
 
-
 function moveAnimation(i){
     return new Promise((resolve) => {
         pirateMoving = true
@@ -227,28 +227,30 @@ function moveAnimation(i){
             let characterRect = character.getBoundingClientRect()
             let destinationIslandRect = islands[i].getBoundingClientRect()
 
-            // let positionX = Math.round(destinationIslandRect.left + ((destinationIslandRect.width / 2) * islandAjustments[i].X))
-            // let positionY = Math.round(destinationIslandRect.top + ((destinationIslandRect.height / 2) * islandAjustments[i].Y) - characterRect.height)
-            let positionX = Math.round(destinationIslandRect.left ) 
-            let positionY = Math.round(destinationIslandRect.top + (destinationIslandRect.height / 2))
+            let positionX = Math.round(destinationIslandRect.left + ((destinationIslandRect.width / 2) * islandAjustments[i].X))
+            let positionY = Math.round(destinationIslandRect.top + ((destinationIslandRect.height / 2) * islandAjustments[i].Y) - characterRect.height)
 
-            characterRect.left < destinationIslandRect.left ? directionX = 1 : directionX = -1
-            characterRect.top < destinationIslandRect.top ? directionY = 1 : directionY = -1
+            characterRect.left < positionX ? directionX = 1 : directionX = -1
+            characterRect.top < positionY ? directionY = 1 : directionY = -1
             if (!pirateMoving) {
                 currentIsland = i
                 clearInterval(intervalID);
                 resolve()
             } 
             else {
-                if(Math.round(characterRect.left) != Math.round(destinationIslandRect.left)){
+                if(Math.round(characterRect.left) != Math.round(positionX)){
                     character.style.left = characterRect.left + directionX + 'px'
                 }
-                if(Math.round(characterRect.top) != Math.round(destinationIslandRect.top)){
+                if(Math.round(characterRect.top) != Math.round(positionY)){
                     character.style.top = characterRect.top + directionY + 'px'
                     
                 }
-                followCharacter()
-                if(Math.round(characterRect.left)  == Math.round(destinationIslandRect.left) && Math.round(characterRect.top) == Math.round(destinationIslandRect.top)){
+                // followCharacter(directionX , directionY , i)
+                let boundryLeft , boundryRight
+                boundryLeft = destinationIslandRect.left
+                boundryRight = destinationIslandRect.left + destinationIslandRect.width
+                if((Math.round(characterRect.left) >= Math.round(boundryLeft) && Math.round(characterRect.left) <= Math.round(boundryRight))
+                 && (Math.round(characterRect.top) == Math.round(positionY))){
                     pirateMoving = false
                     if(i == finalNumber){
                         endGameResults()
@@ -260,18 +262,20 @@ function moveAnimation(i){
 
 }
 
-async function followCharacter(){
+//almost works
+function followCharacter(directionX , directionY, island){
     if(pirateMoving){
         let characterRect = character.getBoundingClientRect()
         let screen = gameScreen.getBoundingClientRect()
         
-        if(characterRect.left >= screen.width / screenMultiplyer / 2 && character.left <= screen.width / screenMultiplyer){
-            let promise = Promise.resolve()
-            distanceX += -1
-            promise.then(()=> moveMap())
+        if(characterRect.right >= screen.width / screenMultiplyer / 2 && characterRect.right <= screen.width / screenMultiplyer){
+            distanceX = -directionX
+        }
+        if(characterRect.top >= screen.height / screenMultiplyer / 2 && characterRect.top <= screen.height / screenMultiplyer){
+            distanceY = -directionY
             
         }
-        
+        moveMap()
     }
 }
 
@@ -379,35 +383,27 @@ async function endGameResults(){
 }
 
 function handleResize(){
-    if(mapAtStartPosition){
-        screenWidth = window.innerWidth
-        screenHeight = window.innerHeight
+    screenWidth = window.innerWidth
+    screenHeight = window.innerHeight
+
+    gameScreen.style.width = (screenWidth * screenMultiplyer) + 'px'
+    gameScreen.style.height = (screenHeight * screenMultiplyer) + 'px'
+
+    character.style.width = (screenWidth * screenMultiplyer) * 0.05 + 'px'
+
+    Object.keys(islands).forEach(key => {
+        initialPostion[key].X = (screenWidth * screenMultiplyer) * precentPosition[key].X
+        initialPostion[key].Y = (screenHeight * screenMultiplyer) * precentPosition[key].Y
+
+        islands[key].style.left = initialPostion[key].X + 'px'
+        islands[key].style.top = initialPostion[key].Y + 'px'
+    })
+
+    prevWidth = screenWidth
+    prevHeight = screenHeight
     
-        distanceX = (screenWidth / prevWidth) * distanceX
-        distanceY = (screenHeight / prevHeight) * distanceY
-    
-        gameScreen.style.width = (screenWidth * screenMultiplyer) + 'px'
-        gameScreen.style.height = (screenHeight * screenMultiplyer) + 'px'
-    
-        character.style.width = (screenWidth * screenMultiplyer) * 0.05 + 'px'
-    
-        Object.keys(islands).forEach(key => {
-            initialPostion[key].X = distanceX + (screenWidth * screenMultiplyer) * precentPosition[key].X
-            initialPostion[key].Y = distanceY + (screenHeight * screenMultiplyer) * precentPosition[key].Y
-    
-            islands[key].style.left = initialPostion[key].X + 'px'
-            islands[key].style.top = initialPostion[key].Y + 'px'
-        })
-    
-        prevWidth = screenWidth
-        prevHeight = screenHeight
-        
-        handleTextResize()
-    } else {
-        returnToStartPoint()
-    }
-    
-    
+    handleTextResize()
+
 }
 
 function handleTextResize(){
@@ -551,13 +547,13 @@ function returnToStartPoint(){
 }
 
 async function getMessage(){
-    const response = await fetch('https://localhost:3000/message');
+    const response = await fetch('http://localhost:3000/message');
     const data = await response.text();
     return data;
 }
 
 async function saveData(data){
-    const response = await fetch('https://localhost:3000/save', {
+    const response = await fetch('http://localhost:3000/save', {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -574,7 +570,7 @@ async function saveData(data){
 }
 
 async function saveUserData(udata){
-    const response = await fetch('https://localhost:3000/save-user-data', {
+    const response = await fetch('http://localhost:3000/save-user-data', {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -591,7 +587,7 @@ async function saveUserData(udata){
 }
 
 async function getUserData(){
-    const response = await fetch('https://localhost:3000/load-user-data');
+    const response = await fetch('http://localhost:3000/load-user-data');
     const data = await response.text();
     return data;
    
@@ -605,7 +601,7 @@ async function handleLogin(type){
             username = value
             await saveUsername(value)
             onPopupVisibilityChange()
-            console.log(username);
+            
         } else {
             popupInput.value = null
             popupInput.placeholder = 'Username should be more than 3 letters or less than 30!'
@@ -619,7 +615,7 @@ async function handleLogin(type){
 }
 
 async function usernameExists(uname){
-    const response = await fetch('https://localhost:3000/load-users');
+    const response = await fetch('http://localhost:3000/load-users');
     const data = await response.json();
     for(let i = 0; i < data.length; ++i){
         if(data[i].username == uname){
@@ -633,7 +629,7 @@ async function usernameExists(uname){
 async function saveUsername(uname){
     let bool = await usernameExists(uname)
     if(!bool){
-        const response = await fetch('https://localhost:3000/save-user', {
+        const response = await fetch('http://localhost:3000/save-user', {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
             mode: 'cors', // no-cors, *cors, same-origin
             cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -711,6 +707,39 @@ function showIslandDescription(island){
     }
 }
 
+let interval , interval2
+function toggleSideMenu(){
+    let eyeIcon = document.getElementById('close-img')
+    if(sidemenuVisible){
+        clearInterval(interval2)
+        
+        let opacity = 1
+        interval = setInterval(() => {
+            sidemenuScreen.style.opacity = opacity
+            opacity -= 0.1
+            if(opacity == 0){
+                clearInterval(interval)
+            }
+        },40)
+        sidemenuVisible = false
+        eyeIcon.src = '../assets/sidemenu/eye-open.png'
+    } else {
+        clearInterval(interval)
+        let opacity = 0
+        interval2 = setInterval(() => {
+            sidemenuScreen.style.opacity = opacity
+            opacity += 0.1
+            
+            if(opacity == 1){
+                clearInterval(interval2)
+            }
+        },40)
+        sidemenuVisible = true
+        eyeIcon.src = '../assets/sidemenu/eye-close.png'
+    }
+    
+}
+
 window.addEventListener('resize', ()=> {
     handleResize()
     if(!pirateMoving){
@@ -727,6 +756,8 @@ screenOrientation.addEventListener("change", (e) =>{
 window.addEventListener("mousedown", function(event) {
     startX = event.clientX;
     startY = event.clientY;
+    beforeMoveScreenLeft = gameScreen.offsetLeft
+    beforeMoveScreenTop = gameScreen.offsetTop
   });
 
   
@@ -781,3 +812,4 @@ function detectScreen(){
   // 1. When pirate moving change resize is bugged.
   // 2. When you move the map and than resize the map tears
   // 3. Pirate change speed when map size is changing
+  // 4. After creating a new user must click login twice beacuse of a saveUsername function (unkown why)
