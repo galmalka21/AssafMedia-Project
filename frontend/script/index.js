@@ -224,6 +224,11 @@ function moveAnimation(i){
         intervalID = setInterval(() => {
             let directionX , directionY
 
+            let screen = gameScreen.getBoundingClientRect()
+            let startX = screen.width / screenMultiplyer / 2
+            let endX = screen.width - screen.width / screenMultiplyer / 2
+            let startY = screenHeight / screenMultiplyer
+            let endY = screenHeight - screenHeight / screenMultiplyer / 2
             let characterRect = character.getBoundingClientRect()
             let destinationIslandRect = islands[i].getBoundingClientRect()
 
@@ -238,17 +243,28 @@ function moveAnimation(i){
                 resolve()
             } 
             else {
-                if(Math.round(characterRect.left) != Math.round(positionX)){
-                    character.style.left = characterRect.left + directionX + 'px'
+                
+                if(characterRect.right >= startX && characterRect.right <= endX){
+                    Object.keys(islands).forEach((key) => {
+                        islands[key].style.left =  islands[key].offsetLeft - directionX + 'px'
+                    })
+                } else {
+                    if(Math.round(characterRect.left) != Math.round(positionX)){
+                        character.style.left = characterRect.left + directionX + 'px'
+                    }
                 }
-                if(Math.round(characterRect.top) != Math.round(positionY)){
-                    character.style.top = characterRect.top + directionY + 'px'
-                    
+                if(characterRect.top >= startY && characterRect.top <= endY){
+                    Object.keys(islands).forEach((key) => {
+
+                        islands[key].style.top = islands[key].offsetTop - directionY + 'px'
+                    })
+                } else {
+                    if(Math.round(characterRect.top) != Math.round(positionY)){
+                        character.style.top = characterRect.top + directionY + 'px'
+                    }
                 }
-                // followCharacter(directionX , directionY , i)
-                let boundryLeft , boundryRight
-                boundryLeft = destinationIslandRect.left
-                boundryRight = destinationIslandRect.left + destinationIslandRect.width
+                let boundryLeft = destinationIslandRect.left
+                let boundryRight = destinationIslandRect.left + destinationIslandRect.width
                 if((Math.round(characterRect.left) >= Math.round(boundryLeft) && Math.round(characterRect.left) <= Math.round(boundryRight))
                  && (Math.round(characterRect.top) == Math.round(positionY))){
                     pirateMoving = false
@@ -263,21 +279,20 @@ function moveAnimation(i){
 }
 
 //almost works
-function followCharacter(directionX , directionY, island){
-    if(pirateMoving){
-        let characterRect = character.getBoundingClientRect()
-        let screen = gameScreen.getBoundingClientRect()
-        
-        if(characterRect.right >= screen.width / screenMultiplyer / 2 && characterRect.right <= screen.width / screenMultiplyer){
-            distanceX = -directionX
-        }
-        if(characterRect.top >= screen.height / screenMultiplyer / 2 && characterRect.top <= screen.height / screenMultiplyer){
-            distanceY = -directionY
-            
-        }
-        moveMap()
-    }
-}
+// function followCharacter(directionX , directionY, island){
+//     let screen = gameScreen.getBoundingClientRect()
+//     let player = character.getBoundingClientRect()
+//     let start = screen.width / screenMultiplyer / 2
+//     let end = screen.width - screen.width / screenMultiplyer / 2
+//     console.log(start);
+//     console.log(end);
+//     if(player.right >= start && player.right <= end){
+//         console.log("move islands");
+//         console.log("PR: " + player.right);
+//     } else {
+//         console.log("move player");
+//     }
+// }
 
 async function rollDice(){
     let promise = Promise.resolve()
@@ -810,6 +825,5 @@ function detectScreen(){
 
   // Known Bugs
   // 1. When pirate moving change resize is bugged.
-  // 2. When you move the map and than resize the map tears
   // 3. Pirate change speed when map size is changing
   // 4. After creating a new user must click login twice beacuse of a saveUsername function (unkown why)
