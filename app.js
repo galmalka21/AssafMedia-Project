@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-const messages = ['הודעה' , 'הודעה1' , 'הודעה3' , 'הודעה4' , 'הודעה5']
+const messages = ['Leave the treasure , Wine dont u join me for a drink?' , 'הודעה1' , 'הודעה3' , 'הודעה4' , 'הודעה5']
 
 const db = mysql.createConnection({
   host: process.env.DATABASE_HOST,
@@ -40,8 +40,6 @@ db.connect((err) => {
   }
   console.log("MySql Connected")
 })
-
-
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/frontend/html/index.html');
@@ -105,16 +103,35 @@ app.get('/load-user-data',(req,res) => {
 
 app.post('/save-user', (req,res) => {
   let username = req.body.username
-  db.query(`INSERT INTO users (username) VALUES (?)`, [username]),
-  (err, result) => {
-    if(err) {
-      console.log(err.message);
-      res.send({status: 'failure'})
+  let userExists = false
+
+  db.query(`SELECT * FROM users`, (err, result) => {
+    if (err) {
+      console.log(err)
     } else {
-      console.log('record inserted');
-      res.send({status: 'success'})
+      for (let i = 0; i < result.length; ++i) {
+        if (username === result[i].username) {
+          userExists = true
+          res.send({ status: 'success' })
+          break
+        }
+      }
+
+      if (!userExists) {
+        
+        db.query(`INSERT INTO users (username) VALUES (?)`, [username], (err, result) => {
+          if (err) {
+            console.log(err.message)
+            res.send({ status: 'failure' })
+          } else {
+            console.log('record inserted')
+            res.send({ status: 'success' })
+          }
+        })
+      }
     }
-  }
+  })
+  
 })
 
 app.post('/save-user-data', (req,res) => {
