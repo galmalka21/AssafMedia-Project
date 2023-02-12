@@ -1,3 +1,5 @@
+
+
 const gameScreen = document.getElementById('game-screen')
 
 const popupScreen = document.getElementById('popup-screen')
@@ -18,6 +20,7 @@ const cardGamesText = document.getElementById('user-games')
 const cardWinsText = document.getElementById('user-wins')
 const cardLossesText = document.getElementById('user-losses')
 
+const trailContainer = document.getElementById('trail')
 const sidemenuScreen = document.getElementById('sidemenu')
 const browseMapButton = document.getElementById('browse-btn')
 const rollDiceButton = document.getElementById('rolldice-btn')
@@ -155,7 +158,7 @@ function restartGame(){
     currentIsland = 1
     gameScreen.style.left = 0 + 'px'
     gameScreen.style.top = 0 + 'px'
-
+    character.style.transform = 'scaleX(1)'
     distanceX = 0
     distanceY = 0
     startX = 0
@@ -219,6 +222,7 @@ function moveAnimationHandler(island){
 }
 
 function moveAnimation(i){
+
     return new Promise((resolve) => {
         pirateMoving = true
         intervalID = setInterval(() => {
@@ -227,16 +231,26 @@ function moveAnimation(i){
             let screen = gameScreen.getBoundingClientRect()
             let startX = screen.width / screenMultiplyer / 2
             let endX = screen.width - screen.width / screenMultiplyer / 2
-            let startY = screenHeight / screenMultiplyer
-            let endY = screenHeight - screenHeight / screenMultiplyer / 2
+            let startY = screen.height / screenMultiplyer / 2
+            let endY = screen.height - screen.height / screenMultiplyer / 2
             let characterRect = character.getBoundingClientRect()
             let destinationIslandRect = islands[i].getBoundingClientRect()
 
-            let positionX = Math.round(destinationIslandRect.left + ((destinationIslandRect.width / 2) * islandAjustments[i].X))
-            let positionY = Math.round(destinationIslandRect.top + ((destinationIslandRect.height / 2) * islandAjustments[i].Y) - characterRect.height)
+            let positionX = Math.floor(destinationIslandRect.left + ((destinationIslandRect.width / 2) * islandAjustments[i].X))
+            let positionY = Math.floor(destinationIslandRect.top + ((destinationIslandRect.height / 2) * islandAjustments[i].Y) - characterRect.height)
 
             characterRect.left < positionX ? directionX = 1 : directionX = -1
-            characterRect.top < positionY ? directionY = 1 : directionY = -1
+            Math.floor(characterRect.top) < Math.floor(positionY) ? directionY = 1 : directionY = -1
+
+            if(directionX == -1){
+                character.style.transform = 'scaleX(-1)'
+                imgRotate = true
+            }
+            else if(directionX == 1){
+                character.style.transform = 'scaleX(1)'
+                imgRotate = false
+            }
+
             if (!pirateMoving) {
                 currentIsland = i
                 clearInterval(intervalID);
@@ -249,24 +263,26 @@ function moveAnimation(i){
                         islands[key].style.left =  islands[key].offsetLeft - directionX + 'px'
                     })
                 } else {
-                    if(Math.round(characterRect.left) != Math.round(positionX)){
+                    if(Math.floor(characterRect.left) != Math.floor(positionX)){
                         character.style.left = characterRect.left + directionX + 'px'
                     }
                 }
-                if(characterRect.top >= startY && characterRect.top <= endY){
+                if(characterRect.bottom >= startY && characterRect.bottom <= endY){
                     Object.keys(islands).forEach((key) => {
 
                         islands[key].style.top = islands[key].offsetTop - directionY + 'px'
                     })
                 } else {
-                    if(Math.round(characterRect.top) != Math.round(positionY)){
+                    if(Math.floor(characterRect.top) != Math.floor(positionY)){
                         character.style.top = characterRect.top + directionY + 'px'
                     }
                 }
                 let boundryLeft = destinationIslandRect.left
-                let boundryRight = destinationIslandRect.left + destinationIslandRect.width
-                if((Math.round(characterRect.left) >= Math.round(boundryLeft) && Math.round(characterRect.left) <= Math.round(boundryRight))
-                 && (Math.round(characterRect.top) == Math.round(positionY))){
+                let boundryRight = destinationIslandRect.left + destinationIslandRect.width * directionX
+                let boundryTop = destinationIslandRect.top
+                let boundryBottom = destinationIslandRect.top - destinationIslandRect.height
+                if((Math.floor(characterRect.left) >= Math.floor(boundryLeft) && Math.floor(characterRect.left) <= Math.floor(boundryRight))
+                 && (Math.floor(characterRect.top) >= Math.floor(boundryBottom) && Math.floor(characterRect.top) <= Math.floor(boundryTop))){
                     pirateMoving = false
                     if(i == finalNumber){
                         endGameResults()
@@ -277,22 +293,6 @@ function moveAnimation(i){
     })
 
 }
-
-//almost works
-// function followCharacter(directionX , directionY, island){
-//     let screen = gameScreen.getBoundingClientRect()
-//     let player = character.getBoundingClientRect()
-//     let start = screen.width / screenMultiplyer / 2
-//     let end = screen.width - screen.width / screenMultiplyer / 2
-//     console.log(start);
-//     console.log(end);
-//     if(player.right >= start && player.right <= end){
-//         console.log("move islands");
-//         console.log("PR: " + player.right);
-//     } else {
-//         console.log("move player");
-//     }
-// }
 
 async function rollDice(){
     let promise = Promise.resolve()
@@ -391,10 +391,11 @@ async function endGameResults(){
             udata.won = 1
             break
     }
+    await saveData(data)
     if(username){
         await saveUserData(udata)
     }
-    await saveData(data)
+    
 }
 
 function handleResize(){
@@ -447,27 +448,13 @@ function handleTextResize(){
 }
 
 function toggleBrowseMap(){
+    console.log("click");
     if(enableBrowseMap){
         enableBrowseMap = false 
         document.body.style.cursor = 'default'
     } else {
         enableBrowseMap = true
         document.body.style.cursor = 'grab'
-    }
-}
-
-function expandMap(type){
-    if(type === 1){
-        let screen = gameScreen.getBoundingClientRect()
-        gameScreen.style.width = screen.width + 1080 + 'px'
-        gameScreen.style.height = screen.height + 920 + 'px'
-        console.log(screen.width);
-    }
-    else if(type === 0){
-        let screen = gameScreen.getBoundingClientRect()
-        gameScreen.style.width = screen.width - 1080 + 'px'
-        gameScreen.style.height = screen.height - 920 + 'px'
-        console.log(screen.width);
     }
 }
 
@@ -561,132 +548,6 @@ function returnToStartPoint(){
     
 }
 
-async function getMessage(){
-    const response = await fetch('http://localhost:3000/message');
-    const data = await response.text();
-    return data;
-}
-
-async function saveData(data){
-    const response = await fetch('http://localhost:3000/save', {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-        'Content-Type': 'application/json'
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
-    })
-    return response.json();  
-}
-
-async function saveUserData(udata){
-    const response = await fetch('http://localhost:3000/save-user-data', {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-        'Content-Type': 'application/json'
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(udata) // body data type must match "Content-Type" header
-    })
-    return response.json(); 
-}
-
-async function getUserData(){
-    const response = await fetch('http://localhost:3000/load-user-data');
-    const data = await response.text();
-    return data;
-   
-}
-
-async function handleLogin(type){
-    if(type == 1){
-        guest = false
-        let value = popupInput.value
-        if(value.length >= 3 && value.length <= 30){
-            username = value
-            await saveUsername(value)
-            onPopupVisibilityChange()
-            
-        } else {
-            popupInput.value = null
-            popupInput.placeholder = 'Username should be more than 3 letters or less than 30!'
-            
-        }
-    } else {
-        guest = true
-        onPopupVisibilityChange()
-    }
-    
-}
-
-async function usernameExists(uname){
-    const response = await fetch('http://localhost:3000/load-users');
-    const data = await response.json();
-    for(let i = 0; i < data.length; ++i){
-        if(data[i].username == uname){
-            return true
-        }
-    }
-    
-    return false
-}
-
-async function saveUsername(uname){
-    let bool = await usernameExists(uname)
-    if(!bool){
-        const response = await fetch('http://localhost:3000/save-user', {
-            method: 'POST', // *GET, POST, PUT, DELETE, etc.
-            mode: 'cors', // no-cors, *cors, same-origin
-            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: 'same-origin', // include, *same-origin, omit
-            headers: {
-            'Content-Type': 'application/json'
-            // 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            redirect: 'follow', // manual, *follow, error
-            referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            body: JSON.stringify({username}) // body data type must match "Content-Type" header
-            })
-            return response.json();
-    }
-}
-
-async function viewUserStats(){
-    if(username){
-        onPopupVisibilityChange()
-        detectPopupType('stats')
-        let data = JSON.parse(await getUserData())
-        let userData = []
-        for(let i = 0 ; i < data.length ; ++i){
-            if(data[i].username == username){
-                userData.push(data[i])
-            }
-        }
-        let userWins = 0
-        let userLosses = 0
-        let totalGames = userData.length
-        for(let i = 0 ; i < totalGames ; ++i){
-            userData[i].won == 1 ? userWins++ : userLosses++
-        }
-        let fixedUsername = username.charAt(0).toUpperCase() + username.slice(1)
-        popupHeader.innerHTML = fixedUsername + " Stats!"
-        cardGamesText.innerHTML = totalGames
-        cardWinsText.innerHTML = userWins
-        cardLossesText.innerHTML = userLosses
-    }
-    
-}
-
 function showIslandDescription(island){
     if(!popupVisable){
         detectPopupType('description')
@@ -776,7 +637,7 @@ window.addEventListener("mousedown", function(event) {
   });
 
   
-window.addEventListener("mousemove", function(event) {
+  window.addEventListener("mousemove", function(event) {
     if (event.which === 1) {
       let currentX = event.clientX;
       let currentY = event.clientY;
@@ -789,22 +650,22 @@ window.addEventListener("mousemove", function(event) {
     }
   });
 
-  window.addEventListener("ontouchstart", function(event) {
-    startX = event.clientX;
-    startY = event.clientY;
+  gameScreen.addEventListener("touchstart", function(event) {
+    
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
   });
 
-  window.addEventListener("ontouchmove", function(event) {
-    if (event.which === 1) {
-      let currentX = event.clientX;
-      let currentY = event.clientY;
+  gameScreen.addEventListener("touchmove", function(event) {
+    if (event.which === 0) {
+      let currentX = event.touches[0].clientX;
+      let currentY = event.touches[0].clientY;
       distanceX = currentX - startX
       distanceY = currentY - startY
       if(enableBrowseMap && !pirateMoving){
+        console.log("moving");
         moveMap()
-      }
-      console.log("MOVE");
-      
+      }  
     }
   });
   
@@ -823,7 +684,3 @@ function detectScreen(){
     }
 }
 
-  // Known Bugs
-  // 1. When pirate moving change resize is bugged.
-  // 3. Pirate change speed when map size is changing
-  // 4. After creating a new user must click login twice beacuse of a saveUsername function (unkown why)
